@@ -10,7 +10,7 @@ run_iter = len(sav_files)
 # Grid size and time
 nx, ny = 64, 64 # 128, 128 or 254, 254
 nt = 64000 # adjust as needed
-isav = 6400
+isav = nt//10
 Lx, Ly = 2.0*np.pi, 2.0*np.pi
 x = np.linspace(0,Lx,nx)
 y = x
