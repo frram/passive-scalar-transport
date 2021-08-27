@@ -67,10 +67,10 @@ if run_iter == 0:
 else:
     data = np.load(sav_files[-1])
     try:
-        nhst = data['nhst']
+        nsav = data['nhst']
     except KeyError:
-        nhst = data['nsav']
-    n = nhst[-1,:,:]
+        nsav = data['nsav']
+    n = nsav[-1,:,:]
     nhst[0,:,:] = n 
     nhst = passive(n,nhst,w,v,alpha,gamma,nx,ny,g,h,nt,isav)
 
