@@ -8,12 +8,11 @@ sav_files = glob.glob(rootdir+'pst-n-pe-*.npz')
 run_iter = len(sav_files)
 
 # Grid size and time
-nx, ny = 64, 64 # 128, 128 or 254, 254
+nx, ny = 64, 64 # 128, 128 or 256, 256
 nt = 64000 # adjust as needed
 isav = nt//10
 Lx, Ly = 2.0*np.pi, 2.0*np.pi
-x = np.linspace(0,Lx,nx)
-y = x
+x = np.linspace(0,Lx,nx); y = x
 dx, dy = Lx/(nx-1), Ly/(ny-1)
 X, Y = np.meshgrid(x,y)
 
@@ -30,6 +29,9 @@ Re = eta*(m/12)*(Lx/D)
 w = -u*np.sin(np.pi*X/d)*np.cos(np.pi*beta*Y/d)
 v = u*np.cos(np.pi*beta*X/d)*np.sin(np.pi*Y/d) + eta*psi_shear
 
+# Noise
+kappa = 1 # noise strength
+
 # Initiliaze scalar array
 n = np.zeros((ny,nx))
 nhst = np.zeros((nt//isav,ny,nx))
@@ -45,9 +47,9 @@ g = -0.01; h = 0
 # Finite difference solver
 def passive(n,nhst,w,v,alpha,gamma,nx,ny,g,h,nt,isav):
     for k in range(0,nt-1,1):
-        n[0,0] = 2*gamma*n[0,1]+ n[1,0]*(gamma-alpha*v[0,0]) + n[ny-2,0]*(gamma+alpha*v[0,0]) + n[0,0]*(1-4*gamma)-2*dx*(alpha*w[0,0]+gamma)*(g)
+        n[0,0] = 2*gamma*n[0,1]+ n[1,0]*(gamma-alpha*v[0,0]) + n[ny-2,0]*(gamma+alpha*v[0,0]) + n[0,0]*(1-4*gamma)-2*dx*(alpha*w[0,0]+gamma)*(g+kappa*random.randint(-100,100)/1000)
         for j in range(1,ny-1):
-            n[j,0] = 2*gamma*n[j,1]+ n[j+1,0]*(gamma-alpha*v[j,0]) + n[j-1,0]*(gamma+alpha*v[j,0]) + n[j,0]*(1-4*gamma)-2*dx*(alpha*w[j,0]+gamma)*(g)
+            n[j,0] = 2*gamma*n[j,1]+ n[j+1,0]*(gamma-alpha*v[j,0]) + n[j-1,0]*(gamma+alpha*v[j,0]) + n[j,0]*(1-4*gamma)-2*dx*(alpha*w[j,0]+gamma)*(g+kappa*random.randint(-100,100)/1000)
         for i in range(1,nx-1):
             n[0,i] = -alpha*(w[0,i]*(n[0,i+1]-n[0,i-1])+v[0,i]*(n[1,i]-n[ny-2,i])) + gamma*(n[0,i+1]+n[0,i-1]+n[1,i]+n[ny-2,i]-4*n[0,i]) + n[0,i]
         n[-1,:] = n[0,:]
@@ -105,9 +107,10 @@ print('Mode Number: ' + str(m))
 print('Shear strength: ' + str(eta))
 print('Peclet Number: ' + str(int(Pe)))
 print('Renynolds Number: ' + str(int(Re)))
-navg = np.sum(nhst[-1,:,:]*dy,axis=0)/Ly
-if np.max(navg) > 0.0175:
+navgy = np.sum(nhst[-1,:,:]*dy,axis=0)/Ly
+ntot = np.sum(navgy*dy)/Ly
+if np.max(ntot) > 0.0119:
     print('Complete: True')
 else:
     print('Complete: False')
-    print('n(max): ' + str(np.max(navg)))
+    print('Concentration: ' + str(np.max(ntot)))
