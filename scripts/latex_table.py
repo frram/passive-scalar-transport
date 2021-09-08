@@ -26,6 +26,7 @@ for i,j in enumerate(files):
         navgy, ntot, dy, Pe, Pesh, alpha, m = info(j)
         navgy = navgy/np.max(navgy)
         sigmasq = np.sum((navgy-n0y)**2*dy)
-    tmp_table = [i,m,alpha,int(Pe),int(Pesh),ntot,np.sqrt(sigmasq)]
+    # interesting to divide Pesh by Pe perhaps...
+    tmp_table = [i,m,alpha,int(Pe),int(Pesh),'{:.2g}'.format(ntot),'{:.2g}'.format(np.sqrt(sigmasq))]
     table.append(tmp_table)
-print(tabulate(table,headers=['Case \#','$m$','$\alpha$','Pe','Pes','ntot','$\sigma$'],tablefmt='latex_raw'))
+print(tabulate(table,headers=['Case \#','$m$','$/alpha$','Pe','Pes','$n_{/text{tot}}$','$\sigma_x$'],tablefmt='latex_raw'))

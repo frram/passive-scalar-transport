@@ -45,7 +45,7 @@ gamma = (D* dt) / (dx**2)
 g = -0.01; h = 0
 
 # Finite difference solver
-def passive(n,nhst,w,v,alpha,gamma,nx,ny,g,h,nt,isav):
+def passive(n,nhst,w,v,alpha,gamma,nx,ny,kappa,g,h,nt,isav):
     for k in range(0,nt-1,1):
         n[0,0] = 2*gamma*n[0,1]+ n[1,0]*(gamma-alpha*v[0,0]) + n[ny-2,0]*(gamma+alpha*v[0,0]) + n[0,0]*(1-4*gamma)-2*dx*(alpha*w[0,0]+gamma)*(g+kappa*random.randint(-100,100)/1000)
         for j in range(1,ny-1):
@@ -65,7 +65,7 @@ def passive(n,nhst,w,v,alpha,gamma,nx,ny,g,h,nt,isav):
     return nhst
 
 if run_iter == 0:
-    nhst = passive(n,nhst,w,v,alpha,gamma,nx,ny,g,h,nt,isav)
+    nhst = passive(n,nhst,w,v,alpha,gamma,nx,ny,kappa,g,h,nt,isav)
 else:
     data = np.load(sav_files[-1])
     try:
@@ -74,28 +74,28 @@ else:
         nsav = data['nsav']
     n = nsav[-1,:,:]
     nhst[0,:,:] = n 
-    nhst = passive(n,nhst,w,v,alpha,gamma,nx,ny,g,h,nt,isav)
+    nhst = passive(n,nhst,w,v,alpha,gamma,nx,ny,kappa,g,h,nt,isav)
 
 if Pe < 10:
     if run_iter < 10:
-        np.savez(rootdir+'pst-n-pe-000'+str(int(Pe))+'-m-'+str(m)+'-alpha-'+str(eta)+'-0'+str(run_iter)+'.npz',nhst=nhst,w=w,v=v,nx=nx,dx=dx,nt=nt,dt=dt,D=D,m=m,eta=eta)
+        np.savez(rootdir+'pst-n-pe-000'+str(int(Pe))+'-m-'+str(m)+'-alpha-'+str(eta)+'-kappa-'+str(kappa)+'-0'+str(run_iter)+'.npz',nhst=nhst,w=w,v=v,nx=nx,dx=dx,nt=nt,dt=dt,D=D,m=m,eta=eta,kappa=kappa)
     else: 
-        np.savez(rootdir+'pst-n-pe-000'+str(int(Pe))+'-m-'+str(m)+'-alpha-'+str(eta)+'-'+str(run_iter)+'.npz',nhst=nhst,w=w,v=v,nx=nx,dx=dx,nt=nt,dt=dt,D=D,m=m,eta=eta)
+        np.savez(rootdir+'pst-n-pe-000'+str(int(Pe))+'-m-'+str(m)+'-alpha-'+str(eta)+'-kappa-'+str(kappa)+'-'+str(run_iter)+'.npz',nhst=nhst,w=w,v=v,nx=nx,dx=dx,nt=nt,dt=dt,D=D,m=m,eta=eta,kappa=kappa)
 elif 100 > Pe >= 10:
     if run_iter < 10:
-        np.savez(rootdir+'pst-n-pe-00'+str(int(Pe))+'-m-'+str(m)+'-alpha-'+str(eta)+'-0'+str(run_iter)+'.npz',nhst=nhst,w=w,v=v,nx=nx,dx=dx,nt=nt,dt=dt,D=D,m=m,eta=eta)
+        np.savez(rootdir+'pst-n-pe-00'+str(int(Pe))+'-m-'+str(m)+'-alpha-'+str(eta)+'-kappa-'+str(kappa)+'-0'+str(run_iter)+'.npz',nhst=nhst,w=w,v=v,nx=nx,dx=dx,nt=nt,dt=dt,D=D,m=m,eta=eta,kappa=kappa)
     else:
-        np.savez(rootdir+'pst-n-pe-00'+str(int(Pe))+'-m-'+str(m)+'-alpha-'+str(eta)+'-'+str(run_iter)+'.npz',nhst=nhst,w=w,v=v,nx=nx,dx=dx,nt=nt,dt=dt,D=D,m=m,eta=eta)
+        np.savez(rootdir+'pst-n-pe-00'+str(int(Pe))+'-m-'+str(m)+'-alpha-'+str(eta)+'-kappa-'+str(kappa)+'-'+str(run_iter)+'.npz',nhst=nhst,w=w,v=v,nx=nx,dx=dx,nt=nt,dt=dt,D=D,m=m,eta=eta,kappa=kappa)
 elif 1000 > Pe >= 100:
     if run_iter < 10:
-        np.savez(rootdir+'pst-n-pe-0'+str(int(Pe))+'-m-'+str(m)+'-alpha-'+str(eta)+'-0'+str(run_iter)+'.npz',nhst=nhst,w=w,v=v,nx=nx,dx=dx,nt=nt,dt=dt,D=D,m=m,eta=eta)
+        np.savez(rootdir+'pst-n-pe-0'+str(int(Pe))+'-m-'+str(m)+'-alpha-'+str(eta)+'-kappa-'+str(kappa)+'-0'+str(run_iter)+'.npz',nhst=nhst,w=w,v=v,nx=nx,dx=dx,nt=nt,dt=dt,D=D,m=m,eta=eta,kappa=kappa)
     else:
-        np.savez(rootdir+'pst-n-pe-0'+str(int(Pe))+'-m-'+str(m)+'-alpha-'+str(eta)+'-'+str(run_iter)+'.npz',nhst=nhst,w=w,v=v,nx=nx,dx=dx,nt=nt,dt=dt,D=D,m=m,eta=eta)
+        np.savez(rootdir+'pst-n-pe-0'+str(int(Pe))+'-m-'+str(m)+'-alpha-'+str(eta)+'-kappa-'+str(kappa)+'-'+str(run_iter)+'.npz',nhst=nhst,w=w,v=v,nx=nx,dx=dx,nt=nt,dt=dt,D=D,m=m,eta=eta,kappa=kappa)
 else:
     if run_iter < 10:
-        np.savez(rootdir+'pst-n-pe-'+str(int(Pe))+'-m-'+str(m)+'-alpha-'+str(eta)+'-0'+str(run_iter)+'.npz',nhst=nhst,w=w,v=v,nx=nx,dx=dx,nt=nt,dt=dt,D=D,m=m,eta=eta)
+        np.savez(rootdir+'pst-n-pe-'+str(int(Pe))+'-m-'+str(m)+'-alpha-'+str(eta)+'-kappa-'+str(kappa)+'-0'+str(run_iter)+'.npz',nhst=nhst,w=w,v=v,nx=nx,dx=dx,nt=nt,dt=dt,D=D,m=m,eta=eta,kappa=kappa)
     else:
-        np.savez(rootdir+'pst-n-pe-'+str(int(Pe))+'-m-'+str(m)+'-alpha-'+str(eta)+'-'+str(run_iter)+'.npz',nhst=nhst,w=w,v=v,nx=nx,dx=dx,nt=nt,dt=dt,D=D,m=m,eta=eta)
+        np.savez(rootdir+'pst-n-pe-'+str(int(Pe))+'-m-'+str(m)+'-alpha-'+str(eta)+'-kappa-'+str(kappa)+'-'+str(run_iter)+'.npz',nhst=nhst,w=w,v=v,nx=nx,dx=dx,nt=nt,dt=dt,D=D,m=m,eta=eta,kappa=kappa)
 
 print('File save complete. Stored in: ' + rootdir)
 print('Gridsize: (' + str(nx) + ',' +str(ny) + ')')
@@ -105,12 +105,13 @@ print('iteration: ' + str(run_iter))
 print('Diffusion: ' + str(D))
 print('Mode Number: ' + str(m))
 print('Shear strength: ' + str(eta))
+print('Noise strength: ' + str(kappa))
 print('Peclet Number: ' + str(int(Pe)))
 print('Renynolds Number: ' + str(int(Re)))
-navgy = np.sum(nhst[-1,:,:]*dy,axis=0)/Ly
-ntot = np.sum(navgy*dy)/Ly
-if np.max(ntot) > 0.0119:
+navgy = np.sum(nhst[-1,:,:]*dy,axis=0)
+ntot = np.sum(navgy*dy)
+if ntot > 0.55:
     print('Complete: True')
 else:
     print('Complete: False')
-    print('Concentration: ' + str(np.max(ntot)))
+    print('Concentration: ' + str(ntot))
