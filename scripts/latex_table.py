@@ -21,12 +21,14 @@ files = sorted(glob.glob(pth+'pst-n-pe-*.npz'))
 for i,j in enumerate(files):
     if i == 0:
         navgy, ntot, dy, Pe, Pesh, alpha, m = info(j)
+        navgymax = np.max(navgy)
         n0y = navgy/np.max(navgy); sigmasq = 0
     else:
         navgy, ntot, dy, Pe, Pesh, alpha, m = info(j)
+        navgymax = np.max(navgy)
         navgy = navgy/np.max(navgy)
         sigmasq = np.sum((navgy-n0y)**2*dy)
     # interesting to divide Pesh by Pe perhaps...
-    tmp_table = [i,m,alpha,int(Pe),int(Pesh),'{:.2g}'.format(ntot),'{:.2g}'.format(np.sqrt(sigmasq))]
+    tmp_table = [i,m,alpha,int(Pe),int(Pesh),'{:.2g}'.format(navgymax),'{:.2g}'.format(ntot),'{:.2g}'.format(np.sqrt(sigmasq))]
     table.append(tmp_table)
-print(tabulate(table,headers=['Case \#','$m$','$/alpha$','Pe','Pes','$n_{/text{tot}}$','$\sigma_x$'],tablefmt='latex_raw'))
+print(tabulate(table,headers=['Case \#','$m$','$/alpha$','Pe','Pes','$n_{/text{max}}$','$n_{/text{tot}}$','$\sigma_x$'],tablefmt='latex_raw'))
