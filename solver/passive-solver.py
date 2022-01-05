@@ -25,7 +25,7 @@ Pe = (u*d*beta)/D
 m = 1 # shear mode
 eta = 6 # shear strength
 psi_shear = (m/12)*np.sin(m*X/2)
-Re = eta*(m/12)*(Lx/D)
+# Re = eta*(m/12)*(Lx/D)
 w = -u*np.sin(np.pi*X/d)*np.cos(np.pi*beta*Y/d)
 v = u*np.cos(np.pi*beta*X/d)*np.sin(np.pi*Y/d) + eta*psi_shear
 
@@ -42,7 +42,7 @@ sigma = 0.0009 # Need to figure this out still...
 dt = sigma * dx * dy / D
 alpha = dt/(2*dx)
 gamma = (D* dt) / (dx**2)
-g = -0.01; h = 0
+g = -0.01; h = -1
 
 # Finite difference solver
 def passive(n,nhst,w,v,alpha,gamma,nx,ny,kappa,g,h,nt,isav):
@@ -56,46 +56,49 @@ def passive(n,nhst,w,v,alpha,gamma,nx,ny,kappa,g,h,nt,isav):
         for i in range(1,nx-1):
             for j in range(1,ny-1):
                 n[j,i] = -alpha*(w[j,i]*(n[j,i+1]-n[j,i-1])+v[j,i]*(n[j+1,i]-n[j-1,i])) + gamma*(n[j,i+1]+n[j,i-1] + n[j-1,i] + n[j+1,i]-4*n[j,i]) +n[j,i]
-        n[0,nx-1] = 2*gamma*n[0,nx-2]+ n[1,nx-1]*(gamma-alpha*v[0,nx-1]) + n[ny-2,nx-1]*(gamma+alpha*v[0,nx-1]) + n[0,nx-1]*(1-4*gamma)-2*dx*(alpha*w[0,nx-1]-gamma)*h
+        n[0,nx-1] = 2*gamma*n[0,nx-2]+ n[1,nx-1]*(gamma-alpha*v[0,nx-1]) + n[ny-2,nx-1]*(gamma+alpha*v[0,nx-1]) + n[0,nx-1]*(1-4*gamma)-2*dx*(alpha*w[0,nx-1]-gamma)*h*n[0,nx-1]
         n[ny-1,nx-1] = n[0,nx-1]
         for j in range(1,ny-1):
-            n[j,nx-1] = 2*gamma*n[j,nx-2]+ n[j+1,nx-1]*(gamma-alpha*v[j,nx-1]) + n[j-1,nx-1]*(gamma+alpha*v[j,nx-1]) + n[j,nx-1]*(1-4*gamma)-2*dx*(alpha*w[j,nx-1]-gamma)*h
+            n[j,nx-1] = 2*gamma*n[j,nx-2]+ n[j+1,nx-1]*(gamma-alpha*v[j,nx-1]) + n[j-1,nx-1]*(gamma+alpha*v[j,nx-1]) + n[j,nx-1]*(1-4*gamma)-2*dx*(alpha*w[j,nx-1]-gamma)*h*n[j,nx-1]
         if(k%isav == 0):
             nhst[k//isav,:,:] = n[:,:]
     return nhst
 
 if run_iter == 0:
     nhst = passive(n,nhst,w,v,alpha,gamma,nx,ny,kappa,g,h,nt,isav)
+    steps = nt
 else:
     data = np.load(sav_files[-1])
+    nsav = data['nhst']
     try:
-        nsav = data['nhst']
+        steps_tmp = data['steps']
     except KeyError:
-        nsav = data['nsav']
+        steps_tmp = 0
     n = nsav[-1,:,:]
     nhst[0,:,:] = n 
     nhst = passive(n,nhst,w,v,alpha,gamma,nx,ny,kappa,g,h,nt,isav)
+    steps = steps_tmp + nt
 
 if Pe < 10:
     if run_iter < 10:
-        np.savez(rootdir+'pst-n-pe-000'+str(int(Pe))+'-m-'+str(m)+'-alpha-'+str(eta)+'-kappa-'+str(kappa)+'-0'+str(run_iter)+'.npz',nhst=nhst,w=w,v=v,nx=nx,dx=dx,nt=nt,dt=dt,D=D,m=m,eta=eta,kappa=kappa)
+        np.savez(rootdir+'pst-n-pe-000'+str(int(Pe))+'-m-'+str(m)+'-alpha-'+str(eta)+'-kappa-'+str(kappa)+'-0'+str(run_iter)+'.npz',nhst=nhst,w=w,v=v,nx=nx,dx=dx,nt=nt,steps=steps,dt=dt,D=D,m=m,eta=eta,kappa=kappa)
     else: 
-        np.savez(rootdir+'pst-n-pe-000'+str(int(Pe))+'-m-'+str(m)+'-alpha-'+str(eta)+'-kappa-'+str(kappa)+'-'+str(run_iter)+'.npz',nhst=nhst,w=w,v=v,nx=nx,dx=dx,nt=nt,dt=dt,D=D,m=m,eta=eta,kappa=kappa)
+        np.savez(rootdir+'pst-n-pe-000'+str(int(Pe))+'-m-'+str(m)+'-alpha-'+str(eta)+'-kappa-'+str(kappa)+'-'+str(run_iter)+'.npz',nhst=nhst,w=w,v=v,nx=nx,dx=dx,nt=nt,steps=steps,dt=dt,D=D,m=m,eta=eta,kappa=kappa)
 elif 100 > Pe >= 10:
     if run_iter < 10:
-        np.savez(rootdir+'pst-n-pe-00'+str(int(Pe))+'-m-'+str(m)+'-alpha-'+str(eta)+'-kappa-'+str(kappa)+'-0'+str(run_iter)+'.npz',nhst=nhst,w=w,v=v,nx=nx,dx=dx,nt=nt,dt=dt,D=D,m=m,eta=eta,kappa=kappa)
+        np.savez(rootdir+'pst-n-pe-00'+str(int(Pe))+'-m-'+str(m)+'-alpha-'+str(eta)+'-kappa-'+str(kappa)+'-0'+str(run_iter)+'.npz',nhst=nhst,w=w,v=v,nx=nx,dx=dx,nt=nt,steps=steps,dt=dt,D=D,m=m,eta=eta,kappa=kappa)
     else:
-        np.savez(rootdir+'pst-n-pe-00'+str(int(Pe))+'-m-'+str(m)+'-alpha-'+str(eta)+'-kappa-'+str(kappa)+'-'+str(run_iter)+'.npz',nhst=nhst,w=w,v=v,nx=nx,dx=dx,nt=nt,dt=dt,D=D,m=m,eta=eta,kappa=kappa)
+        np.savez(rootdir+'pst-n-pe-00'+str(int(Pe))+'-m-'+str(m)+'-alpha-'+str(eta)+'-kappa-'+str(kappa)+'-'+str(run_iter)+'.npz',nhst=nhst,w=w,v=v,nx=nx,dx=dx,nt=nt,steps=steps,dt=dt,D=D,m=m,eta=eta,kappa=kappa)
 elif 1000 > Pe >= 100:
     if run_iter < 10:
-        np.savez(rootdir+'pst-n-pe-0'+str(int(Pe))+'-m-'+str(m)+'-alpha-'+str(eta)+'-kappa-'+str(kappa)+'-0'+str(run_iter)+'.npz',nhst=nhst,w=w,v=v,nx=nx,dx=dx,nt=nt,dt=dt,D=D,m=m,eta=eta,kappa=kappa)
+        np.savez(rootdir+'pst-n-pe-0'+str(int(Pe))+'-m-'+str(m)+'-alpha-'+str(eta)+'-kappa-'+str(kappa)+'-0'+str(run_iter)+'.npz',nhst=nhst,w=w,v=v,nx=nx,dx=dx,nt=nt,steps=steps,dt=dt,D=D,m=m,eta=eta,kappa=kappa)
     else:
-        np.savez(rootdir+'pst-n-pe-0'+str(int(Pe))+'-m-'+str(m)+'-alpha-'+str(eta)+'-kappa-'+str(kappa)+'-'+str(run_iter)+'.npz',nhst=nhst,w=w,v=v,nx=nx,dx=dx,nt=nt,dt=dt,D=D,m=m,eta=eta,kappa=kappa)
+        np.savez(rootdir+'pst-n-pe-0'+str(int(Pe))+'-m-'+str(m)+'-alpha-'+str(eta)+'-kappa-'+str(kappa)+'-'+str(run_iter)+'.npz',nhst=nhst,w=w,v=v,nx=nx,dx=dx,nt=nt,steps=steps,dt=dt,D=D,m=m,eta=eta,kappa=kappa)
 else:
     if run_iter < 10:
-        np.savez(rootdir+'pst-n-pe-'+str(int(Pe))+'-m-'+str(m)+'-alpha-'+str(eta)+'-kappa-'+str(kappa)+'-0'+str(run_iter)+'.npz',nhst=nhst,w=w,v=v,nx=nx,dx=dx,nt=nt,dt=dt,D=D,m=m,eta=eta,kappa=kappa)
+        np.savez(rootdir+'pst-n-pe-'+str(int(Pe))+'-m-'+str(m)+'-alpha-'+str(eta)+'-kappa-'+str(kappa)+'-0'+str(run_iter)+'.npz',nhst=nhst,w=w,v=v,nx=nx,dx=dx,nt=nt,steps=steps,dt=dt,D=D,m=m,eta=eta,kappa=kappa)
     else:
-        np.savez(rootdir+'pst-n-pe-'+str(int(Pe))+'-m-'+str(m)+'-alpha-'+str(eta)+'-kappa-'+str(kappa)+'-'+str(run_iter)+'.npz',nhst=nhst,w=w,v=v,nx=nx,dx=dx,nt=nt,dt=dt,D=D,m=m,eta=eta,kappa=kappa)
+        np.savez(rootdir+'pst-n-pe-'+str(int(Pe))+'-m-'+str(m)+'-alpha-'+str(eta)+'-kappa-'+str(kappa)+'-'+str(run_iter)+'.npz',nhst=nhst,w=w,v=v,nx=nx,dx=dx,nt=nt,steps=steps,dt=dt,D=D,m=m,eta=eta,kappa=kappa)
 
 print('File save complete. Stored in: ' + rootdir)
 print('Gridsize: (' + str(nx) + ',' +str(ny) + ')')
@@ -107,7 +110,7 @@ print('Mode Number: ' + str(m))
 print('Shear strength: ' + str(eta))
 print('Noise strength: ' + str(kappa))
 print('Peclet Number: ' + str(int(Pe)))
-print('Renynolds Number: ' + str(int(Re)))
+print('iterations: ' + str(int(steps)))
 navgy = np.sum(nhst[-1,:,:]*dy,axis=0)/Ly
 ntot = np.sum(navgy*dy)*Ly
 if ntot > 0.55:
